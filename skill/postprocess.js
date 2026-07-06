@@ -86,9 +86,11 @@ html = html.replace(
   (m) => `${m}<br><span style="color:#666;font-size:12px">Email SLA below 90%: ${m.replace('邮件 SLA 未达 90%：', '').replace(/、/g, ', ')}</span>`
 );
 
+// 综合满意度 (combined CSAT) item removed — CSAT column deleted from Individual Summary
+// Remove the entire alert block if present
 html = html.replace(
-  /(综合满意度低于 84%：[^<]+)/g,
-  (m) => `${m}<br><span style="color:#666;font-size:12px">Overall CSAT below 84%: ${m.replace('综合满意度低于 84%：', '').replace(/、/g, ', ')}</span>`
+  /<div style="display:flex[^>]+>[^<]*<span[^>]+>(?:异常 Alert|Needs Improvement)<\/span>[^<]*<span[^>]+>综合满意度低于 84%：[\s\S]*?<\/div>/g,
+  ''
 );
 
 html = html.replace(

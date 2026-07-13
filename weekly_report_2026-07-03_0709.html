@@ -74,17 +74,30 @@ td.empty { color: #aaa; text-align: center; }
 <div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:12px">
 
   <!-- 左列：业绩亮点 + 待改进 -->
-  <div>
-    <div style="font-size:12px;font-weight:700;color:#1456F0;letter-spacing:.5px;margin-bottom:8px;text-transform:uppercase">业绩亮点</div>
-    <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:8px"><span style="background:#16a34a;color:#fff;font-size:10px;font-weight:600;padding:2px 6px;border-radius:3px;white-space:nowrap;margin-top:2px">亮点</span><span style="font-size:13px;color:#333;line-height:1.6">电话渠道 CSAT <strong>87.5%</strong>，FCR <strong>95.8%</strong>，接通率 <strong>96.0%</strong>，三项均达标</span></div>
-    <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:8px"><span style="background:#16a34a;color:#fff;font-size:10px;font-weight:600;padding:2px 6px;border-radius:3px;white-space:nowrap;margin-top:2px">亮点</span><span style="font-size:13px;color:#333;line-height:1.6">在线接通率 <strong>100%</strong>，FCR <strong>96.5%</strong>，处理质量稳定</span></div>
-    <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:8px"><span style="background:#16a34a;color:#fff;font-size:10px;font-weight:600;padding:2px 6px;border-radius:3px;white-space:nowrap;margin-top:2px">亮点</span><span style="font-size:13px;color:#333;line-height:1.6">邮件团队 SLA <strong>92.5%</strong> 达标；whitneylee 周 PC <strong>20</strong>（全队最高）；alvinsim 满意度 <strong>100%</strong></span></div>
+  <div style="display:flex;flex-direction:column;gap:10px">
 
-    <div style="font-size:12px;font-weight:700;color:#dc2626;letter-spacing:.5px;margin-top:14px;margin-bottom:8px;text-transform:uppercase">待改进</div>
-    <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:8px"><span style="background:#ef4444;color:#fff;font-size:10px;font-weight:600;padding:2px 6px;border-radius:3px;white-space:nowrap;margin-top:2px">异常</span><span style="font-size:13px;color:#333;line-height:1.6">综合满意度 <strong>75.6%</strong>，低于目标 ≥84%，差距 8.4 个百分点。主要拖累：邮件 CSAT <strong>62.0%</strong>、在线 CSAT <strong>80.0%</strong></span></div>
-    <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:8px"><span style="background:#ef4444;color:#fff;font-size:10px;font-weight:600;padding:2px 6px;border-radius:3px;white-space:nowrap;margin-top:2px">异常</span><span style="font-size:13px;color:#333;line-height:1.6">个人 CSAT 严重偏低：jacelynlim <strong>42.9%</strong>、terrychen <strong>50.0%</strong>、zyonnleong <strong>50.0%</strong>、calventan <strong>60.0%</strong>、zaydentan <strong>60.0%</strong></span></div>
-    <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:8px"><span style="background:#f59e0b;color:#fff;font-size:10px;font-weight:600;padding:2px 6px;border-radius:3px;white-space:nowrap;margin-top:2px">待提升</span><span style="font-size:13px;color:#333;line-height:1.6">zyonnleong 工单量 163（全队第二），周 PC <strong>0</strong>；外呼有效跟进率 <strong>20.1%</strong> 达标（≥20%），但有效跟进绝对量仍有提升空间</span></div>
-    <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:8px"><span style="background:#f59e0b;color:#fff;font-size:10px;font-weight:600;padding:2px 6px;border-radius:3px;white-space:nowrap;margin-top:2px">待提升</span><span style="font-size:13px;color:#333;line-height:1.6">个人邮件 SLA 达标率不均：calventan <strong>37.0%</strong>、wilsonwong <strong>44.0%</strong>、terrychen <strong>60.0%</strong> 均低于 90%</span></div>
+    <!-- 亮点色块 -->
+    <div style="background:#f0fdf4;border-left:3px solid #16a34a;padding:10px 12px;border-radius:0 6px 6px 0">
+      <div style="font-size:12px;font-weight:700;color:#16a34a;letter-spacing:.5px;margin-bottom:8px;text-transform:uppercase">业绩亮点 Highlights</div>
+      <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:6px"><span style="background:#16a34a;color:#fff;font-size:10px;font-weight:600;padding:2px 6px;border-radius:3px;white-space:nowrap;margin-top:2px">亮点</span><span style="font-size:13px;color:#333;line-height:1.6">电话渠道 CSAT <strong>87.5%</strong>，FCR <strong>95.8%</strong>，接通率 <strong>96.0%</strong>，三项均达标</span></div>
+      <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:6px"><span style="background:#16a34a;color:#fff;font-size:10px;font-weight:600;padding:2px 6px;border-radius:3px;white-space:nowrap;margin-top:2px">亮点</span><span style="font-size:13px;color:#333;line-height:1.6">在线接通率 <strong>100%</strong>，FCR <strong>96.5%</strong>，处理质量稳定</span></div>
+      <div style="display:flex;gap:8px;align-items:flex-start"><span style="background:#16a34a;color:#fff;font-size:10px;font-weight:600;padding:2px 6px;border-radius:3px;white-space:nowrap;margin-top:2px">亮点</span><span style="font-size:13px;color:#333;line-height:1.6">邮件团队 SLA <strong>92.5%</strong> 达标；whitneylee 周 PC <strong>20</strong>（全队最高）；alvinsim 满意度 <strong>100%</strong></span></div>
+    </div>
+
+    <!-- 异常色块 -->
+    <div style="background:#fef2f2;border-left:3px solid #ef4444;padding:10px 12px;border-radius:0 6px 6px 0">
+      <div style="font-size:12px;font-weight:700;color:#dc2626;letter-spacing:.5px;margin-bottom:8px;text-transform:uppercase">异常 Issues</div>
+      <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:6px"><span style="background:#ef4444;color:#fff;font-size:10px;font-weight:600;padding:2px 6px;border-radius:3px;white-space:nowrap;margin-top:2px">异常</span><span style="font-size:13px;color:#333;line-height:1.6">综合满意度 <strong>75.6%</strong>，低于目标 ≥84%，差距 8.4 个百分点。主要拖累：邮件 CSAT <strong>62.0%</strong>、在线 CSAT <strong>80.0%</strong></span></div>
+      <div style="display:flex;gap:8px;align-items:flex-start"><span style="background:#ef4444;color:#fff;font-size:10px;font-weight:600;padding:2px 6px;border-radius:3px;white-space:nowrap;margin-top:2px">异常</span><span style="font-size:13px;color:#333;line-height:1.6">个人 CSAT 严重偏低：jacelynlim <strong>42.9%</strong>、terrychen <strong>50.0%</strong>、zyonnleong <strong>50.0%</strong>、calventan <strong>60.0%</strong>、zaydentan <strong>60.0%</strong></span></div>
+    </div>
+
+    <!-- 待提升色块 -->
+    <div style="background:#fef9ec;border-left:3px solid #f59e0b;padding:10px 12px;border-radius:0 6px 6px 0">
+      <div style="font-size:12px;font-weight:700;color:#d97706;letter-spacing:.5px;margin-bottom:8px;text-transform:uppercase">待提升 To Improve</div>
+      <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:6px"><span style="background:#f59e0b;color:#fff;font-size:10px;font-weight:600;padding:2px 6px;border-radius:3px;white-space:nowrap;margin-top:2px">待提升</span><span style="font-size:13px;color:#333;line-height:1.6">zyonnleong 工单量 163（全队第二），周 PC <strong>0</strong>；外呼有效跟进率 <strong>20.1%</strong> 达标（≥20%），但有效跟进绝对量仍有提升空间</span></div>
+      <div style="display:flex;gap:8px;align-items:flex-start"><span style="background:#f59e0b;color:#fff;font-size:10px;font-weight:600;padding:2px 6px;border-radius:3px;white-space:nowrap;margin-top:2px">待提升</span><span style="font-size:13px;color:#333;line-height:1.6">个人邮件 SLA 达标率不均：calventan <strong>37.0%</strong>、wilsonwong <strong>44.0%</strong>、terrychen <strong>60.0%</strong> 均低于 90%</span></div>
+    </div>
+
   </div>
 
   <!-- 右列：改进措施 -->

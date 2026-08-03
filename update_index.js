@@ -5,8 +5,7 @@ const dir = path.dirname(__filename);
 const files = fs.readdirSync(dir)
   .filter(f => /^weekly_report_\d{4}-\d{2}-\d{2}.*\.html$/.test(f))
   .sort()
-  .reverse()
-  .slice(0, 3);
+  .reverse();
 
 function parseLabel(filename) {
   const base = filename.replace(/\.html$/, '').replace(/^weekly_report_/, '');

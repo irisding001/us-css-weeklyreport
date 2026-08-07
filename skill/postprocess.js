@@ -8,10 +8,21 @@
 
 const fs = require('fs');
 
-const [,, inputPath, outputPath] = process.argv;
+const args = process.argv.slice(2);
+const inputPath  = args[0];
+const outputPath = args[1];
+const csatArg    = args.indexOf('--csat') !== -1 ? args[args.indexOf('--csat') + 1] : null;
+
 if (!inputPath || !outputPath) {
-  console.error('Usage: node postprocess.js <input.html> <output.html>');
+  console.error('Usage: node postprocess.js <input.html> <output.html> [--csat csat.json]');
   process.exit(1);
+}
+
+// Load CSAT data if provided: { agentName: { total, neg, csat } }
+let csatData = null;
+if (csatArg) {
+  try { csatData = JSON.parse(require('fs').readFileSync(csatArg, 'utf8')); }
+  catch (e) { console.error(`[WARN] Could not read --csat file: ${e.message}`); }
 }
 
 let html = fs.readFileSync(inputPath, 'utf8');
@@ -98,27 +109,149 @@ html = html.replace(
   (m) => `${m}<br><span style="color:#666;font-size:12px">Weekly PC = 0: ${m.replace('本周 PC 为 0：', '').replace(/、/g, ', ')}</span>`
 );
 
-// ── 4. Remove CSAT column from Individual Summary table ONLY ─────────────────
-// The Individual Summary is the first table after "Individual Summary" heading.
+// ── 4. CSAT column in Individual Summary table ────────────────────────────────
 // Column order: agent | totalTickets | CSAT% | util% | weeklyPC | monthlyPC
-// We target only this table section to avoid corrupting channel breakdown tables.
+// If --csat JSON provided: inject cross-channel CSAT values.
+// Otherwise: remove the column (legacy behavior).
 const summaryStart = html.indexOf('Individual Summary');
 if (summaryStart !== -1) {
   const tableStart = html.indexOf('<table>', summaryStart);
   const tableEnd = html.indexOf('</table>', tableStart) + '</table>'.length;
   let summaryTable = html.slice(tableStart, tableEnd);
 
-  // Remove CSAT <th>
-  summaryTable = summaryTable.replace(
-    '<th>满意度<br><span class="en">CSAT</span></th>',
-    ''
-  );
-  // Remove CSAT <td> — it is the 3rd td (after agent name and ticket count)
-  summaryTable = summaryTable.replace(
-    /(<tr><td>[^<]+<\/td><td>\d+<\/td>)<td>[^<]*<\/td>/g,
-    '$1'
-  );
+  if (csatData) {
+    // Inject cross-channel CSAT: replace each agent row's 3rd <td> value
+    summaryTable = summaryTable.replace(
+      /<tr><td>([^<]+)<\/td>(<td>[^<]*<\/td>)<td>[^<]*<\/td>/g,
+      (match, name, ticketTd) => {
+        const d = csatData[name];
+        const val = d && d.csat != null ? `${d.csat}%` : '-';
+        return `<tr><td>${name}</td>${ticketTd}<td>${val}</td>`;
+      }
+    );
+  } else {
+    // No CSAT data: remove the column entirely
+    summaryTable = summaryTable.replace(
+      '<th>满意度<br><span class="en">CSAT</span></th>',
+      ''
+    );
+    summaryTable = summaryTable.replace(
+      /(<tr><td>[^<]+<\/td><td>\d+<\/td>)<td>[^<]*<\/td>/g,
+      '$1'
+    );
+  }
+
+  summaryTable = summaryTable.replace(/<th data-col="monthly-lc">[\s\S]*?<\/th>/, '');
+  summaryTable = summaryTable.replace(/<th data-col="monthly-ph">[\s\S]*?<\/th>/, '');
+  summaryTable = summaryTable.replace(/<th data-col="monthly-em">[\s\S]*?<\/th>/, '');
+  summaryTable = summaryTable.replace(/<td data-col="monthly-lc">[^<]*<\/td>/g, '');
+  summaryTable = summaryTable.replace(/<td data-col="monthly-ph">[^<]*<\/td>/g, '');
+  summaryTable = summaryTable.replace(/<td data-col="monthly-em">[^<]*<\/td>/g, '');
+
   html = html.slice(0, tableStart) + summaryTable + html.slice(tableEnd);
+}
+
+// ── 5. Add conversion rate columns to outbound table ─────────────────────────
+// 有效跟进转化率 = 周PC / 有效跟进;  分配转化率 = 周PC / 分配Leads
+// Both inserted to the LEFT of 周PC column.
+const obHeadingIdx = html.indexOf('外呼 Outbound');
+if (obHeadingIdx !== -1) {
+  const tableStart = html.indexOf('<table>', obHeadingIdx);
+  const tableEnd   = html.indexOf('</table>', tableStart) + '</table>'.length;
+  let obTable = html.slice(tableStart, tableEnd);
+
+  // Insert header columns before 周PC
+  obTable = obTable.replace(
+    '<th>周PC<br><span class="en">Weekly PC</span></th>',
+    '<th>有效跟进转化率<br><span class="en">Eff. Conv%</span></th>' +
+    '<th>分配转化率<br><span class="en">Assign Conv%</span></th>' +
+    '<th>周PC<br><span class="en">Weekly PC</span></th>'
+  );
+
+  // Strip HTML tags then extract leading number
+  const getNum = s => {
+    const stripped = s.replace(/<[^>]+>/g, '').trim();
+    const n = stripped.match(/^[\d.]+/);
+    return n ? parseFloat(n[0]) : 0;
+  };
+
+  const tbodyMatch = obTable.match(/<tbody>([\s\S]*?)<\/tbody>/);
+  if (tbodyMatch) {
+    const newTbody = tbodyMatch[1].replace(/<tr>([\s\S]*?)<\/tr>/g, (rowHtml, inner) => {
+      const tds = [];
+      const tdRe = /<td>([\s\S]*?)<\/td>/g;
+      let m;
+      while ((m = tdRe.exec(inner)) !== null) tds.push(m[1]);
+      if (tds.length < 7) return rowHtml;
+
+      const leads = getNum(tds[1]);
+      const effF  = getNum(tds[4]);
+      const pc    = getNum(tds[6]);
+
+      const effConv    = effF  > 0 ? (pc / effF  * 100).toFixed(1) + '%' : '-';
+      const assignConv = leads > 0 ? (pc / leads * 100).toFixed(1) + '%' : '-';
+
+      const cells = inner.match(/<td>[\s\S]*?<\/td>/g);
+      const newInner = cells.slice(0, 6).join('') +
+                       `<td>${effConv}</td>` +
+                       `<td>${assignConv}</td>` +
+                       cells[6];
+      return `<tr>${newInner}</tr>`;
+    });
+    obTable = obTable.replace(/<tbody>[\s\S]*?<\/tbody>/, `<tbody>${newTbody}</tbody>`);
+  }
+
+  html = html.slice(0, tableStart) + obTable + html.slice(tableEnd);
+}
+
+// ── 6. Highlight top1/bottom1 in outbound individual table ───────────────────
+// Columns 5-8: 有效跟进率, 有效跟进转化率, 分配转化率, 周PC
+const obHlIdx = html.indexOf('外呼 Outbound');
+if (obHlIdx !== -1) {
+  const obHlStart = html.indexOf('<table>', obHlIdx);
+  const obHlEnd   = html.indexOf('</table>', obHlStart) + '</table>'.length;
+  let obHlTbl = html.slice(obHlStart, obHlEnd);
+
+  const obHlTbody = obHlTbl.match(/<tbody>([\s\S]*?)<\/tbody>/);
+  if (obHlTbody) {
+    const rowsRaw = [...obHlTbody[1].matchAll(/<tr>([\s\S]*?)<\/tr>/g)].map(m => m[0]);
+    const stripTags = s => s.replace(/<[^>]+>/g, '').trim();
+    const getNum = s => { const n = stripTags(s).match(/^[\d.]+/); return n ? parseFloat(n[0]) : 0; };
+
+    const parsed = rowsRaw.map(r => {
+      const cells = [...r.matchAll(/<td[^>]*>[\s\S]*?<\/td>/g)].map(m => m[0]);
+      return { raw: r, cells, vals: cells.map(c => getNum(c)) };
+    }).filter(r => r.cells.length >= 9);
+
+    if (parsed.length > 1) {
+      const HI_COLS = [5, 6, 7, 8];
+      const maxV = {}, minV = {};
+      for (const ci of HI_COLS) {
+        const nums = parsed.map(r => r.vals[ci]);
+        maxV[ci] = Math.max(...nums);
+        minV[ci] = Math.min(...nums);
+      }
+
+      const newRows = parsed.map(r => {
+        let cells = [...r.cells];
+        for (const ci of HI_COLS) {
+          const v = r.vals[ci];
+          const raw = stripTags(cells[ci]);
+          if (maxV[ci] !== minV[ci]) {
+            if (v === maxV[ci]) {
+              cells[ci] = cells[ci].replace(/(<td[^>]*>)[\s\S]*?(<\/td>)/, `$1<strong style="color:#22c55e;font-weight:700">${raw}</strong>$2`);
+            } else if (v === minV[ci]) {
+              cells[ci] = cells[ci].replace(/(<td[^>]*>)[\s\S]*?(<\/td>)/, `$1<strong style="color:#ef4444;font-weight:600">${raw}</strong>$2`);
+            }
+          }
+        }
+        return `<tr>${cells.join('')}</tr>`;
+      });
+
+      obHlTbl = obHlTbl.replace(/<tbody>[\s\S]*?<\/tbody>/, `<tbody>${newRows.join('')}</tbody>`);
+    }
+    html = html.slice(0, obHlStart) + obHlTbl + html.slice(obHlEnd);
+  }
 }
 
 // ── Write output ─────────────────────────────────────────────────────────────

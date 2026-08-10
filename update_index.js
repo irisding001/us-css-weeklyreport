@@ -4,7 +4,7 @@ const path = require('path');
 const dir = path.dirname(__filename);
 const files = fs.readdirSync(dir)
   .filter(f => /^weekly_report_\d{4}-\d{2}-\d{2}.*\.html$/.test(f))
-  .filter(f => f >= 'weekly_report_2026-07-03')
+  .filter(f => f >= 'weekly_report_2026-06-01')
   .sort()
   .reverse();
 

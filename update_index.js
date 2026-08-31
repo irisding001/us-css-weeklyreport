@@ -6,11 +6,11 @@ const files = fs.readdirSync(dir)
   .filter(f => /^weekly_report_\d{4}-\d{2}-\d{2}.*\.html$/.test(f))
   .filter(f => f >= 'weekly_report_2026-06-01')
   .filter(f => {
-    // Only include Friday-start (Fri~Thu) reports
+    // Include Friday-start (Fri~Thu) and Monday-start (Mon~Sun) reports
     const m = f.match(/^weekly_report_(\d{4})-(\d{2})-(\d{2})/);
     if (!m) return false;
     const d = new Date(`${m[1]}-${m[2]}-${m[3]}T00:00:00Z`);
-    return d.getUTCDay() === 5; // 5 = Friday
+    return d.getUTCDay() === 5 || d.getUTCDay() === 1; // 5=Friday, 1=Monday
   })
   .sort()
   .reverse();
